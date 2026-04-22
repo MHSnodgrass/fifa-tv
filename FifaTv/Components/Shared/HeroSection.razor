@@ -1,0 +1,89 @@
+@inject FifaTv.Services.FifaApiClient Api
+
+@if (_error is not null)
+{
+    <div class="w-full h-[520px] rounded-xl bg-surface-container mb-12 flex items-center justify-center">
+        <p class="text-error text-body-md">Failed to load: @_error</p>
+    </div>
+}
+else if (_match is not null)
+{
+    <section class="relative w-full h-[520px] rounded-xl overflow-hidden mb-12 shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-br from-surface-container to-surface-container-lowest"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent"></div>
+
+        <div class="relative h-full flex flex-col justify-end p-16">
+            <div class="flex items-center space-x-4 mb-4">
+                <span class="px-4 py-1 bg-primary text-on-primary font-black uppercase text-sm rounded-full tracking-widest">
+                    Next Match
+                </span>
+                <span class="text-white/80 font-medium text-xl">
+                    @_match.MatchDate · @_match.KickoffTime?.Substring(0, 5)
+                </span>
+            </div>
+
+            <div class="flex items-center space-x-12 mb-8">
+                <div class="text-center">
+                    <h2 class="text-display-xl text-white uppercase">
+                        @(_match.HomeTeam?.CountryCode ?? _match.HomeTeamPlaceholder)
+                    </h2>
+                </div>
+                <div class="text-display-xl text-primary italic">VS</div>
+                <div class="text-center">
+                    <h2 class="text-display-xl text-white uppercase">
+                        @(_match.AwayTeam?.CountryCode ?? _match.AwayTeamPlaceholder)
+                    </h2>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-8">
+                <button class="bg-primary hover:bg-primary-container text-on-primary font-extrabold px-10 py-4 text-xl rounded-lg transition-all">
+                    Match Details
+                </button>
+                <div class="flex flex-col">
+                    <span class="text-white/60 text-label-sm uppercase">Venue</span>
+                    <span class="text-white text-headline-md">@_match.ArenaName, @_match.City</span>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+else if (_loading)
+{
+    <div class="w-full h-[520px] rounded-xl bg-surface-container mb-12 animate-pulse"></div>
+}
+else
+{
+    <div class="w-full h-[520px] rounded-xl bg-surface-container mb-12 flex items-center justify-center">
+        <p class="text-on-surface-variant text-body-md">No upcoming matches found.</p>
+    </div>
+}
+
+@code {
+    private MatchEvent? _match;
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try 
+        {
+            var scheduled = await Api.GetMatchesByStatusAsync("SCHEDULED");
+
+            _match = scheduled
+                .Where(m => m.MatchDate is not null)
+                .OrderBy(m => m.MatchDate)
+                .ThenBy(m => m.KickoffTime)
+                .FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

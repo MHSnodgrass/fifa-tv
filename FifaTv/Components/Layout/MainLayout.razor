@@ -1,23 +1,23 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+<NavRail />
+
+<header class="fixed top-0 left-0 w-full z-40 flex justify-between items-center pl-40 pr-8 h-24 bg-surface/90 backdrop-blur-md border-b border-white/5">
+    <div class="text-2xl font-black text-primary uppercase tracking-tighter">
+        FIFA WORLD CUP 2026
     </div>
+    <div class="flex items-center space-x-8">
+        <button class="text-white/70 hover:scale-110 transition-transform duration-200">
+            <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button class="text-white/70 hover:scale-110 transition-transform duration-200">
+            <span class="material-symbols-outlined">account_circle</span>
+        </button>
+    </div>
+</header>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+<main class="ml-40 pr-16 pt-32 pb-16">
+    @Body
+</main>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+<div class="fixed inset-0 pointer-events-none border-[12px] border-primary/5 z-10"></div>
