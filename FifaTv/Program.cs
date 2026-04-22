@@ -12,6 +12,9 @@ builder.Services.AddHttpClient<FifaApiClient>(client =>
     client.BaseAddress = new Uri(builder.Configuration["FifaApi:BaseUrl"]);
 });
 
+builder.Services.AddSingleton<LiveScoreState>();
+builder.Services.AddHostedService<LiveScoreService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,4 +1,12 @@
 @inject FifaTv.Services.FifaApiClient Api
+@inject FifaTv.Services.LiveScoreState LiveState
+@implements IDisposable
+
+@{
+    var liveMatch = LiveState.LiveMatches.FirstOrDefault();
+    var featuredMatch = liveMatch ?? _match;
+    var isLive = liveMatch is not null;
+}
 
 @if (_error is not null)
 {
@@ -15,24 +23,36 @@ else if (_match is not null)
 
         <div class="relative h-full flex flex-col justify-end p-16">
             <div class="flex items-center space-x-4 mb-4">
-                <span class="px-4 py-1 bg-primary text-on-primary font-black uppercase text-sm rounded-full tracking-widest">
-                    Next Match
-                </span>
-                <span class="text-white/80 font-medium text-xl">
-                    @_match.MatchDate · @_match.KickoffTime?.Substring(0, 5)
-                </span>
+                @if (isLive)
+                {
+                    <span class="px-4 py-1 bg-red-600 text-white font-black uppercase text-sm rounded-full tracking-widest animate-pulse">
+                        LIVE
+                    </span>
+                    <span class="text-white/80 font-medium text-xl">
+                        @featuredMatch.HomeScore – @featuredMatch.AwayScore
+                    </span>
+                }
+                else
+                {
+                    <span class="px-4 py-1 bg-primary text-on-primary font-black uppercase text-sm rounded-full tracking-widest">
+                        Next Match
+                    </span>
+                    <span class="text-white/80 font-medium text-xl">
+                        @featuredMatch.MatchDate · @featuredMatch.KickoffTime?.Substring(0, 5)
+                    </span>
+                }
             </div>
 
             <div class="flex items-center space-x-12 mb-8">
                 <div class="text-center">
                     <h2 class="text-display-xl text-white uppercase">
-                        @(_match.HomeTeam?.CountryCode ?? _match.HomeTeamPlaceholder)
+                        @(featuredMatch.HomeTeam?.CountryCode ?? featuredMatch.HomeTeamPlaceholder)
                     </h2>
                 </div>
                 <div class="text-display-xl text-primary italic">VS</div>
                 <div class="text-center">
                     <h2 class="text-display-xl text-white uppercase">
-                        @(_match.AwayTeam?.CountryCode ?? _match.AwayTeamPlaceholder)
+                        @(featuredMatch.AwayTeam?.CountryCode ?? featuredMatch.AwayTeamPlaceholder)
                     </h2>
                 </div>
             </div>
@@ -65,6 +85,11 @@ else
     private bool _loading = true;
     private string? _error;
 
+    protected override void OnInitialized()
+    {
+        LiveState.OnMatchesUpdated += HandleMatchesUpdated;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try 
@@ -85,5 +110,15 @@ else
         {
             _loading = false;
         }
+    }
+
+    private void HandleMatchesUpdated()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        LiveState.OnMatchesUpdated -= HandleMatchesUpdated;
     }
 }
